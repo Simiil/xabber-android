@@ -355,6 +355,12 @@ public abstract class AbstractChat extends BaseEntity {
     protected MessageItem newMessage(String resource, String text,
                                      ChatAction action, Date delayTimestamp, boolean incoming,
                                      boolean notify, boolean unencrypted, boolean offline, boolean record) {
+        return this.newMessage(resource,text,null,action,delayTimestamp,incoming,notify,unencrypted,offline,record);
+    }
+
+    protected MessageItem newMessage(String resource, String text, String html,
+                                     ChatAction action, Date delayTimestamp, boolean incoming,
+                                     boolean notify, boolean unencrypted, boolean offline, boolean record) {
         boolean save;
         boolean visible = MessageManager.getInstance().isVisibleChat(this);
         boolean read = incoming ? visible : true;
@@ -399,6 +405,9 @@ public abstract class AbstractChat extends BaseEntity {
                 : NO_RECORD_TAG, resource, text, action, timestamp,
                 delayTimestamp, incoming, read, send, false, incoming,
                 unencrypted, offline);
+        if(html!=null){
+            messageItem.setHTML(html);
+        }
         messages.add(messageItem);
         updateSendQuery(messageItem);
         sort();

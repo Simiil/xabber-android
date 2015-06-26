@@ -14,6 +14,8 @@
  */
 package com.xabber.android.data.message;
 
+import android.util.Log;
+
 import com.xabber.android.data.LogManager;
 import com.xabber.android.data.NetworkException;
 import com.xabber.android.data.SettingsManager;
@@ -29,11 +31,16 @@ import com.xabber.xmpp.muc.MUC;
 
 import net.java.otr4j.OtrException;
 
+import org.jivesoftware.smack.packet.DefaultPacketExtension;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Message.Type;
 import org.jivesoftware.smack.packet.Packet;
+import org.jivesoftware.smack.packet.PacketExtension;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smackx.packet.MUCUser;
+import org.jivesoftware.smackx.packet.XHTMLExtension;
+
+import java.util.Objects;
 
 /**
  * Represents normal chat.
@@ -139,6 +146,13 @@ public class RegularChat extends AbstractChat {
                 return true;
 
             String text = message.getBody();
+            PacketExtension ext = message.getExtension("http://jabber.org/protocol/xhtml-im");
+            Log.wtf("de.sam", "get extension "+ext);
+            String html = null;
+            if(ext!= null && ext instanceof DefaultPacketExtension){
+                DefaultPacketExtension e= (DefaultPacketExtension) ext;
+                html = Objects.toString(e.toXML());
+            }
             if (text == null)
                 return true;
 
@@ -165,6 +179,7 @@ public class RegularChat extends AbstractChat {
             newMessage(
                     resource,
                     text,
+                    html,
                     null,
                     Delay.getDelay(message),
                     true,

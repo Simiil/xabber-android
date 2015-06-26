@@ -88,6 +88,11 @@ public class MessageItem implements Comparable<MessageItem> {
      */
     private String packetID;
 
+    /**
+     * Optional HTML
+     */
+    private String HTML;
+
     public MessageItem(AbstractChat chat, String tag, String resource,
                        String text, ChatAction action, Date timestamp,
                        Date delayTimestamp, boolean incoming, boolean read, boolean sent,
@@ -220,4 +225,11 @@ public class MessageItem implements Comparable<MessageItem> {
         return timestamp.compareTo(another.timestamp);
     }
 
+    public void setHTML(String HTML) {
+        this.HTML = HTML;
+    }
+
+    public String getHTML() {
+        return HTML;
+    }
 }

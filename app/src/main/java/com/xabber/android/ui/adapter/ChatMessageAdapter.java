@@ -15,7 +15,10 @@
 package com.xabber.android.ui.adapter;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.support.v7.widget.RecyclerView;
+import android.text.Html;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,6 +40,13 @@ import com.xabber.android.data.roster.AbstractContact;
 import com.xabber.android.data.roster.RosterManager;
 import com.xabber.android.utils.StringUtils;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -157,6 +167,11 @@ public class ChatMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         }
     }
 
+    @Override
+    public void onViewRecycled(RecyclerView.ViewHolder holder) {
+        super.onViewRecycled(holder);
+    }
+
     public MessageItem getMessageItem(int position) {
         if (position < messages.size()) {
             return messages.get(position);
@@ -201,7 +216,40 @@ public class ChatMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
         message.messageText.setTextAppearance(context, appearanceStyle);
 
-        message.messageText.setText(messageItem.getSpannable());
+        if(messageItem.getHTML()!=null){
+            Html.ImageGetter g = new Html.ImageGetter(){
+                @Override
+                public Drawable getDrawable(String source) {
+                    Log.wtf("de.sam","fetching "+source);
+                    if(source!=null){
+                        InputStream is = null;
+                        try {
+                            is = fetch(source);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        Drawable drawable = Drawable.createFromStream(is, "src");
+                        drawable.setBounds(0, 0, 0 + drawable.getIntrinsicWidth(), 0
+                                + drawable.getIntrinsicHeight());
+                        return drawable;
+                    }
+                   return null;
+
+                }
+
+                private InputStream fetch(String urlString) throws MalformedURLException, IOException {
+                    DefaultHttpClient httpClient = new DefaultHttpClient();
+                    HttpGet request = new HttpGet(urlString);
+                    HttpResponse response = httpClient.execute(request);
+                    return response.getEntity().getContent();
+                }
+            };
+            Log.wtf("de.sam", "rendering "+messageItem.getHTML());
+            message.messageText.setText(Html.fromHtml(messageItem.getHTML(), g, null));
+        }else{
+            message.messageText.setText(messageItem.getSpannable());
+
+        }
 
         message.messageBalloon.getBackground().setLevel(AccountManager.getInstance().getColorLevel(account));
 
